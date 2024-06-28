@@ -43,7 +43,7 @@ class signupController extends Controller
             'status' => true,
             'message' => ' user created succfully',
             'token' => $user->createToken("API TOKEN")->plainTextToken
-        ], 201);
+        ], 200);
     }
 
 
