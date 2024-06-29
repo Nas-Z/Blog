@@ -8,12 +8,19 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Post; 
+use App\Models\Post;
 
-class postController extends Controller {
+class postController extends Controller
+{
 
-    public function index() {
+    public function index()
+    {
 
         return Post::all();
+    }
+
+    public function show(Request $request)
+    {
+        return $request->user()->posts;
     }
 }

@@ -8,29 +8,32 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\hash;
-// ddd
+use Illuminate\Validation\ValidationException;
+
 class LoginController extends Controller
 {
     public function loginUser(Request $request)
     {
-
         try {
+            // Validate request inputs
             $validateUser = Validator::make(
                 $request->all(),
                 [
-                    'email' => 'required|email',
-                    'password' => 'required'
+                    'email' => 'required|string|email',
+                    'password' => 'required|string',
                 ]
             );
 
+            // Return validation errors if any
             if ($validateUser->fails()) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'validation error',
+                    'message' => 'Validation error',
                     'errors' => $validateUser->errors()
                 ], 401);
             }
 
+            // Attempt to authenticate user
             if (!Auth::attempt($request->only(['email', 'password']))) {
                 return response()->json([
                     'status' => false,
@@ -38,14 +41,21 @@ class LoginController extends Controller
                 ], 401);
             }
 
+            // Retrieve authenticated user
             $user = User::where('email', $request->email)->first();
 
+            // Generate token with user's role as ability
+            $token = $user->createToken('API_TOKEN')->plainTextToken;
+
+            // Return successful response with token
             return response()->json([
                 'status' => true,
-                'message' => 'User Logged In Successfully',
-                'token' => $user->createToken("API TOKEN")->plainTextToken
+                'message' => 'User logged in successfully',
+                'role' => $user->role, // Include the user role in the response
+                'token' => $token,
             ], 200);
         } catch (\Throwable $th) {
+            // Return error response in case of an exception
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
